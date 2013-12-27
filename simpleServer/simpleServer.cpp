@@ -27,14 +27,71 @@
 
 #include	"appweb.h"
 #include	<crtdbg.h>
+#include	<signal.h>
 
 /////////////////////////////////// Code ///////////////////////////////
+bool running = true;
+
+/// Handle termination signals
+/** Put the global variable stopEvent to 'true' if a termination signal is caught **/
+void OnSignal(int s)
+{
+	switch (s)
+	{
+	case SIGINT:
+	case SIGTERM:
+		printf("OnSignal %u",s);
+		running = false;
+		break;
+#ifdef WIN32
+	case SIGBREAK:
+		running = false;
+		break;
+#else
+	case SIGPIPE:
+		perror("send SIGPIPE\n");
+		break;
+#endif
+	}
+
+	signal(s, OnSignal);
+}
+
+/// Define hook 'OnSignal' for all termination signals
+void HookSignals()
+{
+	signal(SIGINT, OnSignal);
+	signal(SIGTERM, OnSignal);
+#ifdef WIN32
+	signal(SIGBREAK, OnSignal);
+#else
+	/*{
+		struct sigaction sa;
+		sa.sa_handler = SIG_IGN;
+		if(sigaction( SIGPIPE, &sa, 0 ) == -1){
+			perror("failed to ignore SIGPIPE; sigaction");
+			exit(EXIT_FAILURE);
+		} 
+	}*/
+	signal(SIGPIPE, OnSignal);
+#endif
+}
+
+/// Unhook the signals before leaving
+void UnhookSignals()
+{
+	signal(SIGINT, 0);
+	signal(SIGTERM, 0);
+#ifdef _WIN32
+	signal(SIGBREAK, 0);
+#endif
+}
 
 int main(int argc, char** argv)
 {
 #if WIN32
 	_CrtSetDbgFlag(_CrtSetDbgFlag(_CRTDBG_REPORT_FLAG) | _CRTDBG_LEAK_CHECK_DF  );
-	//_CrtSetBreakAlloc(898);
+	//_CrtSetBreakAlloc(624);
 #endif
 	MaHttp		*http;					// Http service inside our app
 	MaServer	*server;				// For the HTTP server
@@ -97,10 +154,10 @@ int main(int argc, char** argv)
 	//	mechanisms offered by AppWeb.
 	//
 	//mpr.serviceEvents(0, -1);
-	while (true)
-	{
-		mpr.serviceEvents(1, 50);
-	}
+	HookSignals();
+	while (running)
+		mpr.serviceEvents(1, 50);	
+	UnhookSignals();
 
 	//
 	//	Orderly shutdown

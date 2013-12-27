@@ -51,7 +51,7 @@ static void acceptProcWrapper(void *data, int mask, int isMprPoolThread);
 //	Open socket service
 //
 
-MprSocketService::MprSocketService()
+MprSocketService::MprSocketService():log(0)
 {
 	maxClients = 0;
 #if BLD_FEATURE_LOG
@@ -99,7 +99,12 @@ MprSocketService::~MprSocketService()
 }
 #endif
 
-	delete log;
+	if(log)
+	{
+		delete log;
+		log = NULL;
+	}
+	
 #if BLD_FEATURE_MULTITHREAD
 	delete mutex;
 #endif

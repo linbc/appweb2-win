@@ -407,6 +407,8 @@ void MaHttp::unloadModules()
 		} else {
 			delete mp;
 		}
+#else
+		delete mp;
 #endif
 		mp = nextMp;
 	}

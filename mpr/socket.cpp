@@ -874,7 +874,6 @@ void MprSocket::acceptProc(int isMprPoolThread)
 	}
 
 	nsp = newSocket();
-
 	nsp->lock();
 	nsp->sock = fd;
 	nsp->ipAddr = mprStrdup(ipAddr);

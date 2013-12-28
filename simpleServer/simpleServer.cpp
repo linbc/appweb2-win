@@ -28,7 +28,7 @@
 #include	"appweb.h"
 #include	<crtdbg.h>
 #include	<signal.h>
-
+#include "clientHandler.h"
 /////////////////////////////////// Code ///////////////////////////////
 bool running = true;
 
@@ -91,7 +91,7 @@ int main(int argc, char** argv)
 {
 #if WIN32
 	_CrtSetDbgFlag(_CrtSetDbgFlag(_CRTDBG_REPORT_FLAG) | _CRTDBG_LEAK_CHECK_DF  );
-	//_CrtSetBreakAlloc(624);
+	//_CrtSetBreakAlloc(67);
 #endif
 	MaHttp		*http;					// Http service inside our app
 	MaServer	*server;				// For the HTTP server
@@ -125,9 +125,9 @@ int main(int argc, char** argv)
 	//
 	//	Activate the copy module and handler
 	//
+	new MaClientModule(0);
 	new MaDirModule(0);
 	new MaCopyModule(0);	
-
 #if BLD_FEATURE_CONFIG_PARSE
 	//
 	//	Configure the server with the configuration directive file
@@ -155,6 +155,7 @@ int main(int argc, char** argv)
 	//
 	//mpr.serviceEvents(0, -1);
 	HookSignals();
+
 	while (running)
 		mpr.serviceEvents(1, 50);	
 	UnhookSignals();

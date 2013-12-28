@@ -882,7 +882,7 @@ int MaRequest::parseFirstLine(char *line)
 	//	FUTURE -- problematic as we've now lost case. header.uri preserves
 	//	the original uri, but it would be better if we made a fileUri and 
 	//	used that for mapping to storage.
-	mprStrLower(uri);
+	//mprStrLower(uri);//do not alter.modify by jinqi
 #endif
 
 	if (maValidateUri(uri) == 0) {
@@ -3437,9 +3437,10 @@ int MaRequest::setFileName(char *newPath)
 		//
 		if (! (terminalHandler->getFlags() & MPR_HANDLER_MAP_VIRTUAL) &&
 				!(flags & MPR_HTTP_PUT_REQUEST)) {
-			requestError(404, "Can't access URL");
-			finishRequest();
-			return MPR_ERR_CANT_ACCESS;
+			//modify by jinqi.although url path not exit,goto download and fresh
+			//requestError(404, "Can't access URL");
+			//finishRequest();
+			//return MPR_ERR_CANT_ACCESS;
 		}
 		if (etag) {
 			mprFree(etag);
